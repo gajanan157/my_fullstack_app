@@ -1,0 +1,11 @@
+# Ignore Java target build
+/backend/target/
+
+# Ignore Node modules
+/frontend/node_modules/
+
+# IDE configs
+*.log
+*.class
+.vscode/
+.DS_Store
