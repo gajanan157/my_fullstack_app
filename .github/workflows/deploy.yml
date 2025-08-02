@@ -1,0 +1,58 @@
+name: Deploy Full Stack App to EC2
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Copy project to EC2 via SCP
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ec2-user
+        key: ${{ secrets.EC2_KEY }}
+        source: "."
+        target: "/home/ec2-user/app"
+
+    - name: Run deploy script on EC2 via SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ec2-user
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          cd /home/ec2-user/app
+
+          echo "🔄 Pulling latest code"
+          git pull || true
+
+          echo "🧹 Cleaning old builds"
+          rm -rf frontend/build || true
+          rm -rf backend/target || true
+
+          echo "⚙️ Installing frontend deps & building React app"
+          cd frontend
+          npm install
+          npm run build
+
+          echo "📁 Moving React build to Nginx"
+          sudo rm -rf /usr/share/nginx/html/*
+          sudo cp -r build/* /usr/share/nginx/html/
+
+          echo "🔧 Building Spring Boot app"
+          cd ../backend
+          ./mvnw clean package -DskipTests
+
+          echo "♻️ Restarting backend"
+          pkill -f 'java.*\.jar' || true
+          nohup java -jar target/*.jar > app.log 2>&1 &
+
+          echo "✅ Deployment Complete"
