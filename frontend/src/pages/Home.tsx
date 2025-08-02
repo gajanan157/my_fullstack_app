@@ -1,5 +1,5 @@
-import React from "react";
 import profileImg from "../assets/profile.png";
+import { Link } from "react-router-dom";
 import {
   FaGithub,
   FaLinkedin,
@@ -29,18 +29,18 @@ const Home = () => {
 
             {/* 🎯 Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 mb-6">
-              <a
-                href="/projects"
+              <Link
+                to="/projects"
                 className="px-6 py-3 bg-gradient-to-r from-blue-500 to-teal-400 text-white rounded-md font-semibold shadow-md hover:scale-105 hover:shadow-lg transition-transform"
               >
                 View Projects
-              </a>
-              <a
-                href="/contact"
+              </Link>
+              <Link
+                to="/contact"
                 className="px-6 py-3 border border-blue-600 text-blue-600 rounded-md font-semibold hover:bg-blue-50 dark:hover:bg-gray-700 transition"
               >
                 Contact Me
-              </a>
+              </Link>
             </div>
 
             {/* 🌐 Social Media Icons */}
