@@ -1,5 +1,3 @@
-import React from "react";
-
 const skills = [
   { category: "Frontend", items: ["React", "Angular", "Vue", "Tailwind CSS"] },
   { category: "Backend", items: ["Java", "Spring Boot", "Node.js", "Express"] },
