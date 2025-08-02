@@ -1,5 +1,3 @@
-import React from "react";
-
 const About = () => {
   return (
     <section className="min-h-screen px-6 py-12 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white flex items-center justify-center">
