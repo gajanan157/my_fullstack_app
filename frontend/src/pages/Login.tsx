@@ -1,13 +1,33 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Logging in with:", email, password);
-    // Add your login logic here (API call, auth context, etc.)
+    setMessage("");
+
+    try {
+      const response = await axios.post("http://localhost:8080/api/auth/login", {
+        username,
+        password,
+      });
+
+      const { token } = response.data;
+      localStorage.setItem("token", token);
+      setMessage("✅ Login successful");
+      console.log("JWT Token:", token);
+
+      // TODO: Navigate to dashboard or home
+      // Example using React Router: navigate("/dashboard");
+
+    } catch (error) {
+      setMessage("❌ Invalid credentials");
+      console.error("Login failed:", error);
+    }
   };
 
   return (
@@ -16,13 +36,13 @@ const Login = () => {
         <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800 dark:text-white">Login to Your Account</h2>
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
             <input
               type="email"
-              id="email"
+              id="username"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
           </div>
@@ -48,8 +68,14 @@ const Login = () => {
             </button>
           </div>
         </form>
+
+        {message && (
+          <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">{message}</p>
+        )}
+
         <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
-          Don't have an account? <a href="/signup" className="text-blue-600 hover:underline">Sign up</a>
+          Don't have an account?{" "}
+          <a href="/signup" className="text-blue-600 hover:underline">Sign up</a>
         </p>
       </div>
     </section>
