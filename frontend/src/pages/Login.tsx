@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
-
+import { useNavigate } from "react-router-dom";
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +21,7 @@ const Login = () => {
       localStorage.setItem("token", token);
       setMessage("✅ Login successful");
       console.log("JWT Token:", token);
-
+      navigate("/dashboard");
       // TODO: Navigate to dashboard or home
       // Example using React Router: navigate("/dashboard");
 
