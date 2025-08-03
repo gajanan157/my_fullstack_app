@@ -22,9 +22,9 @@ const Home = () => {
               </span>
             </h1>
             <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 mb-8 leading-relaxed">
-              I’m a full-stack developer with hands-on experience in <strong>Angular</strong>, 
+              I’m a full-stack developer with hands-on experience in <strong>Angular</strong>, &nbsp 
               <strong>Vue</strong>, and <strong>Java (Spring Boot)</strong>. I’m also familiar with 
-              <strong>React</strong> and enjoy building clean, efficient, and user-friendly web applications.
+              &nbsp <strong>React</strong> aand enjoy building clean, efficient, and user-friendly web applications.
             </p>
 
             {/* 🎯 Buttons */}

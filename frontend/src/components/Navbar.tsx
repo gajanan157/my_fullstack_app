@@ -20,7 +20,7 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     window.location.href = "/login";
-    console.log("Logged out successfully");
+    console.log("ttgntb")
   };
 
   const toggleMenu = () => setIsOpen(!isOpen);
