@@ -10,56 +10,57 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: ⬇️ Checkout code
-      uses: actions/checkout@v3
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v3
 
-    - name: 🚀 Cleanup old code on EC2
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ec2-user
-        key: ${{ secrets.EC2_KEY }}
-        script: |
-          echo "🧹 Cleaning existing app directory"
-          rm -rf /home/ec2-user/app/*
+      - name: 🚀 Cleanup old code on EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            echo "🧹 Cleaning existing app directory"
+            rm -rf /home/ec2-user/app/*
 
-    - name: 📦 Copy project to EC2 via SCP
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ec2-user
-        key: ${{ secrets.EC2_KEY }}
-        source: "."
-        target: "/home/ec2-user/app"
+      - name: 📦 Copy project to EC2 via SCP
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_KEY }}
+          source: "."
+          target: "/home/ec2-user/app"
 
-    - name: 🔧 Run deploy script on EC2 via SSH
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ec2-user
-        key: ${{ secrets.EC2_KEY }}
-        script: |
-          set -e
-          cd /home/ec2-user/app
+      - name: 🔧 Run deploy script on EC2 via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            set -e
+            cd /home/ec2-user/app
 
-          echo "📁 Frontend: Install dependencies & build React app"
-          cd frontend
-          npm ci
-          npm run build
+            echo "📁 Frontend: Install dependencies & build React app"
+            cd frontend
+            rm -rf node_modules dist
+            npm ci --legacy-peer-deps
+            npm run build
 
-          echo "🌐 Move React build to Nginx"
-          sudo rm -rf /usr/share/nginx/html/*
-          sudo cp -r dist/* /usr/share/nginx/html/
+            echo "🌐 Move React build to Nginx"
+            sudo rm -rf /usr/share/nginx/html/*
+            sudo cp -r dist/* /usr/share/nginx/html/
 
-          echo "🛠 Backend: Build Spring Boot app"
-          cd ../backend
-          chmod +x mvnw
-          ./mvnw clean package -DskipTests
+            echo "🛠 Backend: Build Spring Boot app"
+            cd ../backend
+            chmod +x mvnw
+            ./mvnw clean package -DskipTests
 
-          echo "♻️ Restarting backend service"
-          sudo systemctl restart backend
+            echo "♻️ Restarting backend via systemd"
+            sudo systemctl restart backend
 
-          echo "🔄 Restarting Nginx"
-          sudo systemctl restart nginx
+            echo "🔄 Restarting Nginx"
+            sudo systemctl restart nginx
 
-          echo "✅ Deployment complete"
+            echo "✅ Deployment complete"
