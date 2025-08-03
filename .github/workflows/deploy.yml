@@ -52,6 +52,7 @@ jobs:
           echo "♻️ Restarting backend service"
           (pkill -f 'java.*\.jar' || true)
           nohup java -jar target/backend-0.0.1-SNAPSHOT.jar > /home/ec2-user/app/backend/app.log 2>&1 &
+          disown
 
           echo "🚀 Restarting Nginx"
           sudo systemctl restart nginx
