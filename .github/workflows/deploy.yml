@@ -13,17 +13,17 @@ jobs:
       - name: ⬇️ Checkout code
         uses: actions/checkout@v3
 
-      - name: 🚀 Cleanup old code on EC2
+      - name: 🧹 Clean old app files on EC2
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_KEY }}
           script: |
-            echo "🧹 Cleaning existing app directory"
+            echo "🧹 Removing previous app files..."
             rm -rf /home/ec2-user/app/*
 
-      - name: 📦 Copy project to EC2 via SCP
+      - name: 📦 Upload new code to EC2
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -32,7 +32,7 @@ jobs:
           source: "."
           target: "/home/ec2-user/app"
 
-      - name: 🔧 Run deploy script on EC2 via SSH
+      - name: 🚀 Build and deploy on EC2
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -42,25 +42,23 @@ jobs:
             set -e
             cd /home/ec2-user/app
 
-            echo "📁 Frontend: Install dependencies & build React app"
+            echo "📦 Installing frontend dependencies and building React app"
             cd frontend
             rm -rf node_modules dist
             npm ci --legacy-peer-deps
             npm run build
 
-            echo "🌐 Move React build to Nginx"
+            echo "📁 Deploying frontend to Nginx"
             sudo rm -rf /usr/share/nginx/html/*
             sudo cp -r dist/* /usr/share/nginx/html/
 
-            echo "🛠 Backend: Build Spring Boot app"
+            echo "⚙️ Building Spring Boot app"
             cd ../backend
             chmod +x mvnw
             ./mvnw clean package -DskipTests
 
-            echo "♻️ Restarting backend via systemd"
+            echo "♻️ Restarting backend with systemd"
             sudo systemctl restart backend
 
-            echo "🔄 Restarting Nginx"
-            sudo systemctl restart nginx
-
-            echo "✅ Deployment complete"
+            echo "📄 Showing backend log (last 20 lines)"
+            sudo journalctl -u backend -n 20 --no-pager
