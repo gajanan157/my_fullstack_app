@@ -31,28 +31,29 @@ jobs:
         script: |
           cd /home/ec2-user/app
 
-          echo "🔄 Pulling latest code"
-          git pull || true
-
-          echo "🧹 Cleaning old builds"
-          rm -rf frontend/build || true
+          echo "🔄 Cleaning old builds"
+          rm -rf frontend/dist || true
           rm -rf backend/target || true
 
-          echo "⚙️ Installing frontend deps & building React app"
+          echo "⚙️ Installing frontend dependencies & building React app"
           cd frontend
           npm install
           npm run build
 
-          echo "📁 Moving React build to Nginx"
+          echo "📁 Moving React dist to Nginx"
           sudo rm -rf /usr/share/nginx/html/*
-          sudo cp -r build/* /usr/share/nginx/html/
+          sudo cp -r dist/* /usr/share/nginx/html/
 
           echo "🔧 Building Spring Boot app"
           cd ../backend
+          chmod +x mvnw
           ./mvnw clean package -DskipTests
 
-          echo "♻️ Restarting backend"
+          echo "♻️ Restarting backend service"
           pkill -f 'java.*\.jar' || true
-          nohup java -jar target/*.jar > app.log 2>&1 &
+          nohup java -jar target/backend-0.0.1-SNAPSHOT.jar > /home/ec2-user/app/backend/app.log 2>&1 &
+
+          echo "🚀 Restarting Nginx"
+          sudo systemctl restart nginx
 
           echo "✅ Deployment Complete"
