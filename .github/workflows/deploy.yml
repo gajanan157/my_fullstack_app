@@ -50,7 +50,7 @@ jobs:
           ./mvnw clean package -DskipTests
 
           echo "♻️ Restarting backend service"
-          bash -c "pkill -f 'java.*\.jar' || true"
+          (pkill -f 'java.*\.jar' || true)
           nohup java -jar target/backend-0.0.1-SNAPSHOT.jar > /home/ec2-user/app/backend/app.log 2>&1 &
 
           echo "🚀 Restarting Nginx"
